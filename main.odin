@@ -59,6 +59,7 @@ to_grid_coordinate :: proc(screen: rl.Vector2) -> rl.Vector2 {
 
 main :: proc() {
     data, result := os.read_entire_file("resources/map.txt")
+    defer delete(data)
 
     if !result {
         fmt.eprintf("failed to read file.")
@@ -66,22 +67,33 @@ main :: proc() {
     }
 
     data_stringified := string(data)
+    defer delete(data_stringified)
+
     lines := strings.split(data_stringified, "\n")
+    defer delete(lines)
 
     rl.InitWindow(WIDTH, HEIGHT, "Isometric text")
+    defer rl.CloseWindow()
+
     rl.SetTargetFPS(144)
 
     image := rl.LoadImage("resources/grass.png")
     hl := rl.LoadImage("resources/highlight.png")
 
     texture := rl.LoadTextureFromImage(image)
+    defer rl.UnloadTexture(texture)
+    
     hl_texture := rl.LoadTextureFromImage(hl)
+    defer rl.UnloadTexture(hl_texture)
 
+    //no need to keep the images in memory if they're loaded onto the gpu.
     rl.UnloadImage(image)
     rl.UnloadImage(hl)
 
     for !rl.WindowShouldClose() {
         rl.BeginDrawing()
+        defer rl.EndDrawing()
+
         rl.ClearBackground(rl.BLACK)
 
         mouse := rl.GetMousePosition()
@@ -106,7 +118,5 @@ main :: proc() {
             }
         }
         rl.DrawRectangle(i32(mouse.x), i32(mouse.y), 5, 5, rl.RED)
-        rl.EndDrawing()
     }
-    rl.CloseWindow()
 }
