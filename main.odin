@@ -109,10 +109,11 @@ main :: proc() {
                 iso_pos.y += CENTER_Y
 
                 if tile == '1' {
-                    rl.DrawTexture(texture, i32(iso_pos.x), i32(iso_pos.y), rl.WHITE)
-
                     if int(grid_pos.x) == x && int(grid_pos.y) == y {
-                        rl.DrawTexture(hl_texture, i32(iso_pos.x), i32(iso_pos.y), rl.WHITE)
+                        rl.DrawTexture(texture, i32(iso_pos.x), i32(iso_pos.y - 5), rl.WHITE)
+                        rl.DrawTexture(hl_texture, i32(iso_pos.x), i32(iso_pos.y - 5), rl.WHITE)
+                    } else {
+                        rl.DrawTexture(texture, i32(iso_pos.x), i32(iso_pos.y), rl.WHITE)
                     }
                 }
             }
