@@ -7,35 +7,21 @@ import "core:strings"
 
 import rl "vendor:raylib"
 
-i_x :: 1
-i_y :: 0.5
-j_x :: -1
-j_y :: 0.5
+import "core:math/linalg"
 
-w :: 32
-h :: 32
+CENTER_X :: 1920 / 4
+CENTER_Y :: 1080 / 4
 
-WIDTH :: 1280
-HEIGHT :: 720
+TILE_SIZE :: 32
 
-CENTER_X :: WIDTH / 2
-CENTER_Y :: HEIGHT / 2
-
-to_screen_coordinate :: proc(tile: rl.Vector2) -> rl.Vector2 {
-    return {
-        tile.x * i_x * 0.5 * w + tile.y * j_x * 0.5 * w,
-        tile.x * i_y * 0.5 * h + tile.y * j_y * 0.5 * h,
-    }
+ISO_MATRIX :: linalg.Matrix2f32 {
+    1 * 0.5 * TILE_SIZE, -1 * 0.5 * TILE_SIZE,
+    0.5 * 0.5 * TILE_SIZE, 0.5 * 0.5 * TILE_SIZE
 }
 
-invert_matrix :: proc(a, b, c, d: f32) -> (inv: rl.Vector4) {
-    det := 1.0 / (a * d - b * c)
-    return rl.Vector4{
-        det * d,
-        det * -b,
-        det * -c,
-        det * a,
-    }
+to_screen_coordinate :: proc(tile: rl.Vector2) -> rl.Vector2 {
+    result := ISO_MATRIX * tile
+    return result
 }
 
 to_grid_coordinate :: proc(screen: rl.Vector2) -> rl.Vector2 {
@@ -43,17 +29,12 @@ to_grid_coordinate :: proc(screen: rl.Vector2) -> rl.Vector2 {
         screen.x - CENTER_X,
         screen.y - CENTER_Y
     }
+    
+    inv := linalg.matrix2_inverse_f32(ISO_MATRIX)
 
-    a : f32 = i_x * 0.5 * w
-    b : f32 = j_x * 0.5 * w
-    c : f32 = i_y * 0.5 * h
-    d : f32 = j_y * 0.5 * h
-    
-    inv := invert_matrix(a, b, c, d)
-    
-    return rl.Vector2{
-        adjusted.x * inv.x + adjusted.y * inv.y,
-        adjusted.x * inv.z + adjusted.y * inv.w,
+    return rl.Vector2 {
+        adjusted.x * inv[0][0] + adjusted.y * inv[0][1],
+        adjusted.x * inv[1][0] + adjusted.y * inv[1][1]
     }
 }
 
@@ -72,7 +53,7 @@ main :: proc() {
     lines := strings.split(data_stringified, "\n")
     defer delete(lines)
 
-    rl.InitWindow(WIDTH, HEIGHT, "Isometric text")
+    rl.InitWindow(1920, 1080, "Isometric text")
     defer rl.CloseWindow()
 
     rl.SetTargetFPS(144)
@@ -104,7 +85,7 @@ main :: proc() {
         for row, y in lines {
             for tile, x in row {
                 iso_pos := to_screen_coordinate({f32(x), f32(y)})
-                iso_pos.x -= w * 0.5
+                iso_pos.x -= TILE_SIZE * 0.5
                 iso_pos.x += CENTER_X
                 iso_pos.y += CENTER_Y
 
