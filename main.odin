@@ -31,11 +31,7 @@ to_grid_coordinate :: proc(screen: rl.Vector2) -> rl.Vector2 {
     }
     
     inv := linalg.matrix2_inverse_f32(ISO_MATRIX)
-
-    return rl.Vector2 {
-        adjusted.x * inv[0][0] + adjusted.y * inv[0][1],
-        adjusted.x * inv[1][0] + adjusted.y * inv[1][1]
-    }
+    return adjusted * inv
 }
 
 main :: proc() {
