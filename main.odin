@@ -20,8 +20,7 @@ ISO_MATRIX :: linalg.Matrix2f32 {
 }
 
 to_screen_coordinate :: proc(tile: rl.Vector2) -> rl.Vector2 {
-    result := ISO_MATRIX * tile
-    return result
+    return ISO_MATRIX * tile
 }
 
 to_grid_coordinate :: proc(screen: rl.Vector2) -> rl.Vector2 {
